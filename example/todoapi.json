@@ -1,0 +1,62 @@
+{
+    "base_url": "http://localhost:5000/api/v1",
+    "meta": {
+        "documentation": ""
+    },
+    "methods": {
+        "CreateTodo": {
+            "description": "Create new todo",
+            "documentation": "Create new todo",
+            "expected_status": [
+                200
+            ],
+            "method": "POST",
+            "name": "CreateTodo",
+            "path": "/todos",
+            "required_payload": [
+                "title",
+                "done"
+            ]
+        },
+        "GetTodo": {
+            "description": "Get todo",
+            "documentation": "Get todo",
+            "expected_status": [
+                200
+            ],
+            "method": "GET",
+            "name": "GetTodo",
+            "path": "/todos/:id",
+            "required_params": [
+                "id"
+            ]
+        },
+        "ListTodos": {
+            "description": "list all todos",
+            "documentation": "list all todos",
+            "expected_status": [
+                200
+            ],
+            "method": "GET",
+            "name": "ListTodos",
+            "path": "/todos"
+        },
+        "UpdateTodo": {
+            "description": "update todo",
+            "documentation": "update todo",
+            "expected_status": [
+                200
+            ],
+            "method": "PATCH",
+            "name": "UpdateTodo",
+            "path": "/todos/:id",
+            "required_params": [
+                "id"
+            ],
+            "required_payload": [
+                "title",
+                "done"
+            ]
+        }
+    }
+}

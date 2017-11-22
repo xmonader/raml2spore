@@ -8,6 +8,8 @@ def raml_from_file(filepath):
     Load RAML object from filepath.
 
     @param filepath string: RAML specs file path.
+
+    returns raml document root object.
     """
     with open(filepath) as fp:
         return r.parse(fp)
@@ -18,11 +20,30 @@ def raml_from_string(ramlsource):
     Load RAML object from string.
     @param ramlsource string: RAML specs string.
 
-    returns 
+    returns raml document root object
     """
     sp = StringIO(ramlsource)
-    tree = r.parse(sp)
-    return tree
+    root = r.parse(sp)
+    return root
+
+
+class SporeFile:
+
+    def __init__(self):
+        self.base_url = ""
+        self.version = ""
+        self.methods = {}
+        self.authority = ""
+        self.name = ""
+        self.meta = {
+            "documentation": ""
+        }
+        self.media_type = ""
+
+    def __str__(self):
+        # del d['raml_obj']
+        return json.dumps(self, default=lambda o: {k: v for (k, v) in o.__dict__.items() if v},
+                          sort_keys=True, indent=4)
 
 
 class SporeMethod:
@@ -51,32 +72,18 @@ class SporeMethod:
         self.defaults = defaults
         self.form_data = {}
         self.media_type = ""
+        self.expected_status = expected_status
 
     def __str__(self):
         return json.dumps(self, default=lambda o: o.__dict__,
                           sort_keys=True, indent=4)
 
 
-class SporeFile:
-
-    def __init__(self):
-        self.baseuri = ""
-        self.version = ""
-        self.methods = {}
-        self.authority = ""
-        self.name = ""
-        self.meta = {
-            "documentation": ""
-        }
-        self.media_type = ""
-
-    def __str__(self):
-        # del d['raml_obj']
-        return json.dumps(self, default=lambda o: {k: v for (k, v) in o.__dict__.items() if v},
-                          sort_keys=True, indent=4)
+def normalize_path(path):
+    return path.replace("{", ":").replace("}", "")
 
 
-def spore_from_raml_string(ramlsource):
+def spore_from_raml_object(ramlobject):
     """
     Create SPORE from RAML specs.
 
@@ -84,26 +91,30 @@ def spore_from_raml_string(ramlsource):
 
     returns SPORE specs.
     """
-    api = raml_from_string(ramlsource)
+    api = ramlobject
     spore_file = SporeFile()
-    spore_file.baseuri = api.base_uri
+    spore_file.base_url = api.base_uri
     spore_file.version = api.version or ''
     spore_file.media_type = api.media_type
 
     for resource in api.resources:
         meth = SporeMethod()
-        import ipdb
-        ipdb.set_trace()
-        meth.name = resource.raw['displayName']
+
+        meth.path = normalize_path(resource.path)
+        try:
+            meth.name = resource.raw[resource.method]['displayName']
+        except:
+            meth.name = resource.name
         if resource.uri_params:
             meth.required_params = [
                 param.name for param in resource.uri_params if param.required]
+        if resource.query_params:
             meth.optional_params = [
-                param.name for param in resource.uri_params if not param.required]
+                param.name for param in resource.query_params]
         meth.documentation = resource.desc
         meth.description = resource.desc
         meth.expected_status = [res.code for res in resource.responses]
-        meth.payload = []
+        meth.required_payload = []
         try:
             if resource.body:
                 meth.required_payload = list(resource.body[
@@ -118,6 +129,8 @@ def spore_from_raml_string(ramlsource):
 
 
 def spore_from_raml_file(filepath):
-    with open(filepath) as f:
-        source = f.read()
-        return spore_from_raml_string(source)
+    return spore_from_raml_object(raml_from_file(filepath))
+
+
+def spore_from_raml_string(source):
+    return spore_from_raml_object(raml_from_string(source))
