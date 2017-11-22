@@ -1,0 +1,81 @@
+
+#%RAML 1.0
+
+baseUri: http://localhost:5000
+
+title: API with Examples
+
+/ays:
+  /repository:
+    get:
+      displayName: listRepositories
+      description: list all repositorys
+      responses:
+        200:
+          body:
+            application/json:
+              type: string[]
+    post:
+      displayName: createRepository
+      description: create a new repository
+      body:
+        application/json:
+          properties:
+            name:
+              type: string
+              required: true
+            git_url:
+              type: string
+              required: true
+      responses:
+        201:
+          description: repository created
+          body:
+            application/json:
+              type: Repository
+        409:
+          description: Repository with this name already exists.
+          body:
+            application/json:
+              type: Error
+    /{repository}:
+      uriParameters:
+        repository:
+          type: string
+      get:
+        displayName: getRepository
+        description: Get information of a repository
+        responses:
+          200:
+            description: Detail of  a repository
+            body:
+              application/json:
+                type: Repository
+          404:
+            description: Repository not found
+            body:
+              application/json:
+                type: Error
+      delete:
+        displayName: deleteRepository
+        description: Delete a repository
+        responses:
+          204:
+            description: Repository removed
+          404:
+            description: Repository not found
+            body:
+              application/json:
+                type: Error
+      /destroy:
+        post:
+            displayName: destroyRepository
+            description: destroy repo without deleting it from FS
+            responses:
+                204:
+                    description: Repository destroyed
+                404:
+                    description: Repository not found
+                    body:
+                      application/json:
+                        type: Error

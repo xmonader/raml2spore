@@ -1,0 +1,65 @@
+
+#%RAML 1.0
+
+baseUri: http://localhost:5000/api/v1
+
+title: TODO API
+
+types:
+    Todo:
+        properties:
+            id: int
+            title: string
+            done: boolean
+        example:
+            id: 1
+            title: "Example todo"
+            done: false
+
+/todos:
+    get:
+        displayName: ListTodos
+        description: list all todos
+        responses:
+            200:
+                body:
+                    application/json:
+                        type: Todo[]
+    post:
+        displayName: CreateTodo
+        description: Create new todo
+        body:
+            application/json:
+                properties:
+                    title:
+                        type: string
+                        required: true
+                    done:
+                        type: boolean
+                        required: true
+        responses:
+            200:
+                body:
+                    application/json:
+                        type: Todo
+    /{todoId}:
+        uriParameters:
+            todoId:
+                type: string
+        get:
+            displayName: Get Todo
+            description: Get todo
+            responses:
+                200:
+                    body:
+                        application/json:
+                            type: Todo[]
+        
+        patch:
+            displayName: Update todo
+            description: update todo
+            responses:
+                200:
+                    body:
+                        application/json:
+                            type: Todo
